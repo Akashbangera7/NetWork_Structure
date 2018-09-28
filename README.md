@@ -20,9 +20,9 @@
     </ul><br> 
   </li>  
   
-  <li>Punith
+  <li>Punith Narayanaswamy
     <ul>
-      <li></li>   
+      <li>narayanaswamy.p@husky.neu.edu</li>   
     </ul><br> 
   </li>  
 </ul>  
