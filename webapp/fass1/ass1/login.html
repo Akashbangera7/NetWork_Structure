@@ -1,0 +1,21 @@
+<html>
+
+
+
+<body>
+<p>Date/Time: <span id="datetime"></span></p>
+<form action="/routes/authenticate" method="POST">
+
+Email: <input type="text" name="email">
+Password: <input type="password" name="password">
+
+<input type="submit" value="Submit">
+</form>
+
+
+</body>
+<script>
+var dt = new Date();
+document.getElementById("datetime").innerHTML = dt.toLocaleString();
+</script>
+</html>
