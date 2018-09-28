@@ -1,6 +1,6 @@
 # csye6225-fall2018
 
-<h1>Team members - </h1>
+<h2>Team members - </h2>
 <ul>
   <li>Rishabh Bharat Jain
     <ul>
