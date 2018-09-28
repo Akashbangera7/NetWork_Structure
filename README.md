@@ -16,7 +16,7 @@
  
   <li>Sujay Joshi
     <ul>
-      <li></li>   
+      <li>joshi.suj@husky.neu.edu</li>   
     </ul><br> 
   </li>  
   
