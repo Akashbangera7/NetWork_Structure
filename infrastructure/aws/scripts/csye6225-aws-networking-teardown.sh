@@ -10,7 +10,7 @@ read stack_name
 
 vpc_name="${stack_name}-csye6225-vpc"
 vpcId=$(aws ec2 describe-vpcs --query "Vpcs[*].[VpcId,Tags[0].Value]" --output text |grep $vpc_name| awk '{print $1}' )
-if [ $? -ne 0 ]; then
+if [ $? -eq 0 ]; then
     internetgateway_name="${stack_name}-csye6225-InternetGateway"
     routetable_name="${stack_name}-csye6225-public-route-table"
     subnet1_name="${stack_name}-csye6225-subnet-1"
