@@ -25,4 +25,10 @@
       <li>narayanaswamy.p@husky.neu.edu</li>   
     </ul><br> 
   </li>  
-</ul>  
+</ul> 
+<br>
+
+In this project we setup IAM console by provide read only access to two groups(staff and team members) also we do cost managmnet and set up biling alarms.<br>
+The cloudformation has been done using json file and using the cli.
+
+
