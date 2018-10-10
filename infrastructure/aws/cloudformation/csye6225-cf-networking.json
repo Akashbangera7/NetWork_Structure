@@ -1,0 +1,174 @@
+{
+AWSTemplateFormatVersion: "2010-09-09",
+Resources: {
+myVPC: {
+Type: "AWS::EC2::VPC",
+Properties: {
+CidrBlock: "10.0.0.0/16",
+EnableDnsSupport: "false",
+EnableDnsHostnames: "false",
+InstanceTenancy: "dedicated",
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+PUBLICSUBNET1: {
+Type: "AWS::EC2::Subnet",
+Properties: {
+VpcId: {Ref: "myVPC" },
+CidrBlock: "10.0.0.0/24",
+AvailabilityZone: "us-east-1a",
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+PUBLICSUBNET2: {
+Type: "AWS::EC2::Subnet",
+Properties: {
+VpcId: {
+Ref: "myVPC"
+},
+CidrBlock: "10.0.1.0/24",
+AvailabilityZone: "us-east-1b",
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+PUBLICSUBNET3: {
+Type: "AWS::EC2::Subnet",
+Properties: {
+VpcId: {
+Ref: "myVPC"
+},
+CidrBlock: "10.0.2.0/24",
+AvailabilityZone: "us-east-1c",
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+PRIVATESUBNET1: {
+Type: "AWS::EC2::Subnet",
+Properties: {
+VpcId: {
+Ref: "myVPC"
+},
+CidrBlock: "10.0.10.0/24",
+AvailabilityZone: "us-east-1a",
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+PRIVATESUBNET2: {
+Type: "AWS::EC2::Subnet",
+Properties: {
+VpcId: {
+Ref: "myVPC"
+},
+CidrBlock: "10.0.11.0/24",
+AvailabilityZone: "us-east-1b",
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+PRIVATESUBNET3: {
+Type: "AWS::EC2::Subnet",
+Properties: {
+VpcId: {
+Ref: "myVPC"
+},
+CidrBlock: "10.0.12.0/24",
+AvailabilityZone: "us-east-1c",
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+myInternetGateway: {
+Type: "AWS::EC2::InternetGateway",
+Properties: {
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+AttachGateway: {
+Type: "AWS::EC2::VPCGatewayAttachment",
+Properties: {
+VpcId: {
+Ref: "myVPC"
+},
+InternetGatewayId: {
+Ref: "myInternetGateway"
+}
+}
+},
+myRouteTable: {
+Type: "AWS::EC2::RouteTable",
+Properties: {
+VpcId: {
+Ref: "myVPC"
+},
+Tags: [
+{
+Key: "foo",
+Value: "bar"
+}
+]
+}
+},
+mySubnetRouteTableAssociation: {
+Type: "AWS::EC2::SubnetRouteTableAssociation",
+Properties: {
+SubnetId: {
+Ref: "PRIVATESUBNET1"
+},
+RouteTableId: {
+Ref: "myRouteTable"
+}
+}
+},
+PublicRoute: {
+Type: "AWS::EC2::Route",
+DependsOn: "AttachGateway",
+Properties: {
+RouteTableId: {
+Ref: "myRouteTable"
+},
+DestinationCidrBlock: "0.0.0.0/0",
+GatewayId: {
+Ref: "myInternetGateway"
+}
+}
+}
+}
+}
