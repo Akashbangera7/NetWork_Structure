@@ -12,8 +12,8 @@ var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : 'Joshisujay@1996',
-  database : 'ass1'
+  password : 'Samanushetty@7',
+  database : 'ass3'
 });
 connection.connect(function(err){
 if(!err) {
@@ -39,11 +39,29 @@ var server = app.listen(3000,  "127.0.0.1", function () {
 
 });
 
+
+// to get passward :   user.pass  and if you want username  : user.name
 //rest api to get a transaction data
+app.get('/transaction', function (req, res) {
+   var user = auth(req)
+
+  //Select username,password from login where username = user.name && password = user.username
+   connection.query(`select username,password from login where username = '${user.name}' && password = '${user.pass}'`, function (error, results) {
+	  if (error) throw error;
+    connection.query('select * from transaction', function (error, results, fields) {
+ 	  if (error) throw error;
+
+ 	  res.end(JSON.stringify(results));
+ 	});
+	  res.send(results);
+	});
+});
+
 app.get('/transaction/:id', function (req, res) {
    console.log(req);
    connection.query('select * from transaction where id=?', [req.params.id], function (error, results, fields) {
 	  if (error) throw error;
+
 	  res.end(JSON.stringify(results));
 	});
 });
@@ -58,11 +76,18 @@ app.post('/transaction', function (req, res) {
 });
 
 //rest api to update record into mysql database
-app.put('/transaction', function (req, res) {
-   connection.query('UPDATE `transaction` SET `description`=?,`merchant`=?,`amount`=?,`date`=?,`category`=? where `id`=?', [req.body.employee_name,req.body.employee_salary, req.body.employee_age, req.body.id], function (error, results, fields) {
-	  if (error) throw error;
-	  res.end(JSON.stringify(results));
-	});
+app.put('/transaction/:id', function (req, res) {
+  console.log(req.params.id);
+  var sql = `UPDATE transaction SET description = '${req.body.description}',merchant = '${req.body.merchant}',amount = '${req.body.amount}',date = '${req.body.date}',category = '${req.body.category}' WHERE id = '${req.params.id}'`;
+  connection.query(sql,function(err,trans){
+    if(err)
+    {throw err;}
+    res.send(trans);
+  });
+  //  connection.query('UPDATE `transaction` SET `description`=?,`merchant`=?,`amount`=?,`date`=?,`category`=? where `id`=?', [req.params.id,req.body.transaction,req.body.merchant,req.body.amount,req.body.date,req.body.category], function (error, results, fields) {
+	//   if (error) throw error;
+	//   res.end(JSON.stringify(results));
+	// });
 });
 
 app.delete('/transaction', function (req, res) {
