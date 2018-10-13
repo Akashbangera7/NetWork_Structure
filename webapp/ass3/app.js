@@ -39,8 +39,6 @@ var server = app.listen(3000,  "127.0.0.1", function () {
 
 });
 
-/// to get passward :   user.pass  and if you want username  : user.name
-//rest api to get a transaction data
 app.get('/transaction', function (req, res) {
    var user = auth(req)
 
@@ -83,10 +81,6 @@ app.put('/transaction/:id', function (req, res) {
     {throw err;}
     res.send(trans);
   });
-  //  connection.query('UPDATE `transaction` SET `description`=?,`merchant`=?,`amount`=?,`date`=?,`category`=? where `id`=?', [req.params.id,req.body.transaction,req.body.merchant,req.body.amount,req.body.date,req.body.category], function (error, results, fields) {
-    //   if (error) throw error;
-    //   res.end(JSON.stringify(results));
-    // });
 });
 
 app.delete('/transaction', function (req, res) {
@@ -96,4 +90,3 @@ app.delete('/transaction', function (req, res) {
       res.end('Record has been deleted!');
     });
 });
-// server.listen(3000)
