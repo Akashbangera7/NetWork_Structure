@@ -1,18 +1,42 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Parameters" : {
+    "Parameters": {
       "KeyName": {
         "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
         "Default" : "centos",
         "Type": "AWS::EC2::KeyPair::KeyName",
         "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
       },
-      "InstanceType" : {
+      "InstanceType": {
             "Description" : "WebServer EC2 instance type",
             "Type" : "String",
             "Default" : "t2.micro",
             "AllowedValues" : [ "t1.micro", "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
             "ConstraintDescription" : "must be a valid EC2 instance type."
+      },
+      "usernameRds" : {
+        "Type" : "String",
+        "Default" : "csye6225master"
+      },
+      "passwordRds" : {
+        "Type" : "String",
+        "Default" : "csye6225password"
+      },
+      "vpcId" : {
+        "Type" : "String"
+      },
+      "subnet1" : {
+        "Type" : "String"
+      },
+      "subnet2" : {
+        "Type" : "String"
+      },
+      "subnet3" : {
+        "Type" : "String"
+      },
+      "allocatedStorage" : {
+        "Type" : "String",
+        "Default" : "15"
       }
     },
     "Mappings" : {
@@ -30,51 +54,104 @@
     "webapp" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
+        "VpcId" : { "Ref" : "vpcId" },
         "GroupDescription" : "Enable HTTP access via port 80",
         "SecurityGroupIngress" : [
           {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"},
           {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
           {"IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"}
         ]
-      }
+      }   
     },
     "rds": {
         "Type": "AWS::EC2::SecurityGroup",
         "Properties" : {
+          "VpcId" : { "Ref" : "vpcId" },
           "GroupDescription": "Open database for access",
           "SecurityGroupIngress" : [{
             "IpProtocol" : "tcp",
             "FromPort" : "3306",
             "ToPort" : "3306",
-            "SourceSecurityGroupName" : { "Ref" : "webapp" }
+            "SourceSecurityGroupId" : { "Ref" : "webapp" }
           }]
         }
     },
     "WebServerInstance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
-        "SecurityGroups": [
-                  {
-                      "Ref": "webapp"
-                  }
-        ],
+        "SubnetId" : { "Ref" : "subnet1" },
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
         "InstanceType"   : { "Ref" : "InstanceType" },
         "KeyName"        : { "Ref" : "KeyName" },
-
+        "SecurityGroupIds" : [{"Ref": "webapp"}],
         "BlockDeviceMappings" : [
           {
             "DeviceName" : "/dev/sda1",
             "Ebs" : {
               "VolumeType" : "gp2",
-              "DeleteOnTermination" : "false",
+              "DeleteOnTermination" : "true",
               "VolumeSize" : "20"
             }
           }
-      ]
+        ],
+        "Tags" : [ {"Key" : "Name", "Value" : {"Fn::Join" :[ "-",[{"Ref" : "AWS::StackName"},"csye6225-webserverinstance"]]}}]
+    }
+  },
+  "DynamoDBTable" : {
+    "Type" : "AWS::DynamoDB::Table",
+    "Properties" : {
+      "AttributeDefinitions" : [
+        {
+          "AttributeName" : "id",
+          "AttributeType" : "S"
+        }
+      ],
+      "KeySchema" : [
+        {
+          "AttributeName" : "id",
+          "KeyType" : "HASH"
+        }
+      ],
+      "ProvisionedThroughput" : {
+        "ReadCapacityUnits" : "5",
+        "WriteCapacityUnits" : "5"
+      },
+      "TableName" : "csye6225"
+    }
+  },
+  "awsbucket" :{
+    "Type" : "AWS::S3::Bucket",
+    "Properties" : {
+      "BucketName" : "csye6225-fall2018-jainrishabh.me.csye6225.com"
     }
   }
-
+  ,
+  "myDBSubnetGroup" : {
+    "Type" : "AWS::RDS::DBSubnetGroup",
+    "Properties" : {
+       "DBSubnetGroupDescription" : "description",
+       "SubnetIds" : [{"Ref" : "subnet1"},{ "Ref" : "subnet2"}]
+    }
+ },
+  "RDSInstance": {
+    "Type" : "AWS::RDS::DBInstance",
+    "Properties":{
+      "AllocatedStorage" : { "Ref" : "allocatedStorage" },
+      "BackupRetentionPeriod" : "0",
+      "StorageType" : "gp2",
+      "DBInstanceClass" : "db.t2.medium",
+      "DBInstanceIdentifier" : "csye6225-fall2018",
+      "Engine" : "MySQL",
+      "EngineVersion" : "5.7.19",
+      "MasterUsername" : { "Ref" : "usernameRds" },
+      "MasterUserPassword" : { "Ref" : "passwordRds" },
+      "DBName" : "csye6225",
+      "MultiAZ" : "false",
+      "PubliclyAccessible" : "false",
+      "DBSubnetGroupName" : {"Ref" : "myDBSubnetGroup"},
+      "Tags" : [ {"Key" : "Name", "Value" : {"Fn::Join" :[ "-",[{"Ref" : "AWS::StackName"},"csye6225-rds-instance"]]}}]
+    }
   }
-}
+    }
+  }

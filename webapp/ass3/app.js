@@ -12,8 +12,8 @@ var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : 'Joshisujay@1996',
-  database : 'ass1'
+  password : 'Samanushetty@7',
+  database : 'ass3'
 });
 connection.connect(function(err){
 if(!err) {
@@ -39,6 +39,9 @@ var server = app.listen(3000,  "127.0.0.1", function () {
 
 });
 
+// to get passward :   user.pass  and if you want username  : user.name
+//rest api to get a transaction data
+
 app.get('/transaction', function (req, res) {
    var user = auth(req)
 
@@ -61,6 +64,7 @@ app.get('/transaction/:id', function (req, res) {
 
       res.end(JSON.stringify(results));
     });
+
 });
 
 //rest api to create a new record into mysql database
