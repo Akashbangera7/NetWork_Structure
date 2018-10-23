@@ -1,6 +1,9 @@
 <html>
 <body>
 <p>Date/Time: <span id="datetime"></span></p>
+
+
+
 <form action="/routes/register" method="POST">
 First Name: <input type="text" name="name">
 
@@ -10,6 +13,9 @@ Paswword: <input type="password" name="password">
 <input type="submit" value="Submit">
 </form>
 </body>
+
+
+<!--to display the time  -->
 <script>
 var dt = new Date();
 document.getElementById("datetime").innerHTML = dt.toLocaleString();

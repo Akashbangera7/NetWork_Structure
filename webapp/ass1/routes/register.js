@@ -1,6 +1,8 @@
 var Cryptr = require('cryptr');
 var express=require("express");
 var connection = require('./../config');
+var url = require('url');
+var fs = require('fs');
 // cryptr = new Cryptr('myTotalySecretKey');
 
 module.exports.register=function(req,res){
