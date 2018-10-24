@@ -116,7 +116,8 @@
         "Path" : "/",
         "Roles" : [ {
           "Ref" :"CodeDeployEC2Role"
-        } ]
+        } ],
+        "InstanceProfileName" : "CodeDeployEC2InstanceName"
       }
     },
     "CodeDeployRole" : {
@@ -143,7 +144,15 @@
         "Path" : "/",
         "Roles" : [ {
           "Ref" :"CodeDeployRole"
-        } ]
+        } ],
+        "InstanceProfileName" : "CodeDeployInstanceName"
+      }
+    },
+    "CodeDeployApplicationdefined" : {
+      "Type" : "AWS::CodeDeploy::Application",
+      "Properties" : {
+        "ApplicationName" : "CODE_DEPLOY_APPLICATION_NAME",
+        "ComputePlatform" : "Server"
       }
     },
     "s3bucket" : {
