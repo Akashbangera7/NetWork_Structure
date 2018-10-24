@@ -110,6 +110,15 @@
                 "RoleName" : "CodeDeployEC2ServiceRole"
             }
     },
+    "CodeDeployEC2InstanceProfile" : {
+      "Type" : "AWS::IAM::InstanceProfile",
+      "Properties" : {
+        "Path" : "/",
+        "Roles" : [ {
+          "Ref" :"CodeDeployEC2Role"
+        } ]
+      }
+    },
     "CodeDeployRole" : {
       "Type": "AWS::IAM::Role",
              "Properties": {
@@ -127,6 +136,15 @@
                 "RoleName" : "CodeDeployServiceRole",
                 "ManagedPolicyArns" : ["arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"]
             }
+    },
+    "CodeDeployInstanceProfile" : {
+      "Type" : "AWS::IAM::InstanceProfile",
+      "Properties" : {
+        "Path" : "/",
+        "Roles" : [ {
+          "Ref" :"CodeDeployRole"
+        } ]
+      }
     },
     "s3bucket" : {
       "Type" : "AWS::S3::Bucket",
