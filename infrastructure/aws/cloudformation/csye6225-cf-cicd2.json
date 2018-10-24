@@ -1,0 +1,27 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "CICD Stack AWS CloudFormation",
+  "Parameters" : {
+    "InstanceEC": {
+      "Description" : "Tagged EC2 instance",
+      "Default" : "rickapp-csye6225-webserverinstance",
+      "Type": "String"
+    }
+  },
+  "Resources" : {
+  "CodeDeployApplication" : {
+    "Type" : "AWS::CodeDeploy::DeploymentGroup",
+    "Properties" : {
+      "ApplicationName" : "CODE_DEPLOY_APPLICATION_NAME",
+      "DeploymentGroupName" : "CODE_DEPLOY_APPLICATION_GROUP",
+      "DeploymentStyle": {
+        "DeploymentOption" : "WITHOUT_TRAFFIC_CONTROL",
+        "DeploymentType": "IN_PLACE"
+      },
+      "Ec2TagFilters" : [{"Key" : "Name" ,"Type" : "KEY_AND_VALUE","Value": {"Ref" : "InstanceEC" }}],
+      "DeploymentConfigName" : "CodeDeployDefault.OneAtATime",
+      "ServiceRoleArn" : "arn:aws:iam::818076872389:role/CodeDeployServiceRole"
+    }
+  }
+  }
+}
