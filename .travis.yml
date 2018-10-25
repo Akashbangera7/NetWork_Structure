@@ -6,14 +6,13 @@ sudo: false
 
 install: true
 
-before_install:
-  - chmod +x gradlew
 
 script:
   - pwd
   - cd webapp/Assignment_4
-  - ./gradlew war
-  - cd build/libs
+  - ls -al
+  - mvn clean install
+  - cd target
   - ls -al
   - cd ../../..
   - pwd
