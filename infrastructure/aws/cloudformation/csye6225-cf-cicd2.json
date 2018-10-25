@@ -6,6 +6,11 @@
       "Description" : "Tagged EC2 instance",
       "Default" : "rickapp-csye6225-webserverinstance",
       "Type": "String"
+    },
+    "ServiceRole": {
+      "Description" : "Service Role ARN of CodeDeployServiceRole",
+      "Default" : "arn:aws:iam::818076872389:role/CodeDeployServiceRole",
+      "Type" : "String"
     }
   },
   "Resources" : {
@@ -20,7 +25,7 @@
       },
       "Ec2TagFilters" : [{"Key" : "Name" ,"Type" : "KEY_AND_VALUE","Value": {"Ref" : "InstanceEC" }}],
       "DeploymentConfigName" : "CodeDeployDefault.OneAtATime",
-      "ServiceRoleArn" : "arn:aws:iam::818076872389:role/CodeDeployServiceRole"
+      "ServiceRoleArn" : {"Ref" : "ServiceRole" }
     }
   }
   }
