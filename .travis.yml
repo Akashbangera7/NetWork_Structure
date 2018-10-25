@@ -3,7 +3,6 @@ jdk:
   - oraclejdk8
 
 sudo: false
-
 install: true
 
 script:
@@ -44,7 +43,7 @@ deploy:
   access_key_id: $access_key_id
   secret_access_key: $secret_access_key
   on:
-    all_branches: true
+    branch: master
 - provider: codedeploy
   access_key_id: $access_key_id
   bucket: $s3_bucket
@@ -56,4 +55,4 @@ deploy:
   secret_access_key: $secret_access_key
   wait-until-deployed: true
   on:
-    all_branches: true
+    branch: master
