@@ -85,6 +85,7 @@
         "InstanceType"   : { "Ref" : "InstanceType" },
         "KeyName"        : { "Ref" : "KeyName" },
         "SecurityGroupIds" : [{"Ref": "webapp"}],
+        "IamInstanceProfile" : "CodeDeployEC2InstanceName" ,
         "UserData": {
           "Fn::Base64": {
               "Fn::Join": [
@@ -94,7 +95,7 @@
                       "yum install ruby ntp wget java-1.8.0-openjdk-devel -y",
                       "systemctl start ntpd",
                       "systemctl enable ntpd",
-                      "cd /home/ec2-user",
+                      "cd /home/centos",
                       "wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install",
                       "chmod +x ./install",
                       "sudo ./install auto",

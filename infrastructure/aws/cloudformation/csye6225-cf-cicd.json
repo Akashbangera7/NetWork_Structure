@@ -158,7 +158,7 @@
     "s3bucket" : {
       "Type" : "AWS::S3::Bucket",
       "Properties" : {
-        "BucketName" : "code-deploy.csye6225-fall2018-jainrishabh.me.csye6225.com"
+        "BucketName" : "code-deploy.csye6225-fall2018-jainrishabh2.me.csye6225.com"
       }
     }
   }
