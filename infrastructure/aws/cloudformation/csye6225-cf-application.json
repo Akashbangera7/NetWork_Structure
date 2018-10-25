@@ -59,7 +59,8 @@
         "SecurityGroupIngress" : [
           {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"},
           {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
-          {"IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"}
+          {"IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"},
+          {"IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"}
         ]
       }   
     },
@@ -78,6 +79,7 @@
     },
     "WebServerInstance": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": "RDSInstance",
       "Properties": {
         "SubnetId" : { "Ref" : "subnet1" },
         "ImageId" : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
@@ -132,6 +134,35 @@
                       "echo 'Restart=always' >> tomcat.service",
                       "echo '[Install]' >> tomcat.service",
                       "echo 'WantedBy=multi-user.target' >> tomcat.service",
+                      
+                      "echo '#!/bin/sh' >> /opt/tomcat/bin/setenv.sh",
+                      {
+                        "Fn::Join": [
+                        "",
+                        [
+                          "echo 'JAVA_OPTS=\"$JAVA_OPTS -Durl=\"jdbc:mysql://",
+                        {
+                          "Fn::GetAtt": [
+                            "RDSInstance",
+                            "Endpoint.Address"
+                          ]
+                        },
+                        ":3306/csye6225\"\"'>> /opt/tomcat/bin/setenv.sh \n"
+                        ]
+                        ]
+                      },
+                {"Fn::Join":["",["sudo echo \"JAVA_OPTS=\\\"\\${JAVA_OPTS} -Dspring.profiles.active=aws\\\"\" >> /opt/tomcat/bin/setenv.sh "]]},
+                {"Fn::Join":["",["sudo echo \"JAVA_OPTS=\\\"\\${JAVA_OPTS} -DendpointUrl=https://s3.us-east-1.amazonaws.com\\\"\" >> /opt/tomcat/bin/setenv.sh "]]},
+                {"Fn::Join":["",["sudo echo \"JAVA_OPTS=\\\"\\${JAVA_OPTS} -Dfolder=centos\\\"\" >> /opt/tomcat/bin/setenv.sh "]]},
+                {"Fn::Join":["",["sudo echo \"JAVA_OPTS=\\\"\\${JAVA_OPTS} -Dusername=",{"Ref":"usernameRds"},"\\\"\" >> /opt/tomcat/bin/setenv.sh "]]},
+                {"Fn::Join":["",["sudo echo \"JAVA_OPTS=\\\"\\${JAVA_OPTS} -Dpassword=",{"Ref":"passwordRds"},"\\\"\" >> /opt/tomcat/bin/setenv.sh "]]},
+                  {"Fn::Join":["",["sudo echo \"JAVA_OPTS=\\\"\\${JAVA_OPTS} -DbucketName=","csye6225-fall2018-jainrishabh.me.csye6225.com","\\\"\" >> /opt/tomcat/bin/setenv.sh "]]},
+                  
+                  "chmod +x /opt/tomcat/bin/setenv.sh",
+                  
+                      
+                      
+                      
                       "systemctl daemon-reload",
                       "#systemctl start cloudwatch.service",
                       "#systemctl enable cloudwatch.service",
