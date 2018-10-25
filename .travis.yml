@@ -6,6 +6,9 @@ sudo: false
 
 install: true
 
+before_install:
+  - chmod +x gradlew
+
 script:
   - pwd
   - cd webapp/Assignment_4
