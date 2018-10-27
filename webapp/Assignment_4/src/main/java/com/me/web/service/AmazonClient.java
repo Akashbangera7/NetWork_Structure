@@ -8,7 +8,9 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import javassist.bytecode.stackmap.BasicBlock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,37 +35,44 @@ public class AmazonClient{
 
     @PostConstruct
     private void initializeAmazon() {
-        /*AWSCredentials credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
-        this.s3client = new AmazonS3Client(credentials);*/
-        this.s3client = AmazonS3ClientBuilder.standard().withRegion("us-east-1").build();
+        this.s3client = AmazonS3ClientBuilder.standard().build();
     }
 
-    private File convertMultiPartToFile(MultipartFile file) throws IOException {
-        File convFile = new File(file.getOriginalFilename());
-        FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(file.getBytes());
-        fos.close();
-        return convFile;
-    }
+//    private File convertMultiPartToFile(MultipartFile file) throws IOException {
+//        File convFile = new File(file.getOriginalFilename());
+//        FileOutputStream fos = new FileOutputStream(convFile);
+//        fos.write(file.getBytes());
+//        fos.close();
+//        return convFile;
+//    }
 
 //    private String generateFileName(MultipartFile multiPart) {
 //        return new Date().getTime() + "-" + multiPart.getOriginalFilename().replace(" ", "_");
 //    }
 
-    private void uploadFileTos3bucket(String fileName, File file) {
-        this.s3client.putObject(new PutObjectRequest(this.bucketName, fileName, file)
-                .withCannedAcl(CannedAccessControlList.PublicRead));
+    private void uploadFileTos3bucket(String fileName, MultipartFile file) {
+        ObjectMetadata objMeta = new ObjectMetadata();
+        objMeta.setContentType("image");
+
+        try {
+            this.s3client.putObject(new PutObjectRequest(this.bucketName, fileName, file.getInputStream(), objMeta)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+        }
+        catch(java.io.IOException e)
+        {
+
+        }
     }
 
-    public String uploadFile(MultipartFile multipartFile, String id) {
+        public String uploadFile(MultipartFile multipartFile, String id) {
 
         String fileUrl = "";
         try {
-            File file = convertMultiPartToFile(multipartFile);
+//            File file = convertMultiPartToFile(multipartFile);
             String fileName = id;//generateFileName(multipartFile);
-            uploadFileTos3bucket(fileName, file);
+            uploadFileTos3bucket(fileName, multipartFile);
             fileUrl = this.s3client.getUrl(this.bucketName,fileName).toString();
-            file.delete();
+//            file.delete();
         } catch (Exception e) {
             e.printStackTrace();
         }

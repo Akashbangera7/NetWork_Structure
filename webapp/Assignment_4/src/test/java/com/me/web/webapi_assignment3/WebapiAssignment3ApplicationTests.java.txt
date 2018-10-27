@@ -16,8 +16,8 @@ import static org.junit.Assert.assertEquals;
 public class WebapiAssignment3ApplicationTests {
 
     @Test
-    public void contextLoads() {  assertEquals(2, 2);
-
+    public void contextLoads() {
+        assertEquals(2, 2);
     }
 
     /*  Transaction Save test*/

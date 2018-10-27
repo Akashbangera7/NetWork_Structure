@@ -31,7 +31,7 @@ public class TransactionController {
     private AmazonClient amazonClient;
 
     @RequestMapping(value = "transaction", method = RequestMethod.POST)
-    public HashMap<String, Object> saveTransaction(HttpServletRequest req, TransactionDao txDao, UserDao userDao, AttachmentDao attachmentDao, @RequestPart("file") MultipartFile file) throws  Exception{
+    public HashMap<String, Object> saveTransaction(HttpServletRequest req, TransactionDao txDao, UserDao userDao, AttachmentDao attachmentDao, @RequestPart(value="file", required = false) MultipartFile file) throws  Exception{
 
         String headers = req.getHeader(HttpHeaders.AUTHORIZATION);
         User user = null;
@@ -60,27 +60,28 @@ public class TransactionController {
                     tx.setCategory(category);
                     tx.setUser(user);
                     if(txDao.insertTransaction(tx)==2){
-                        if(!file.isEmpty() || file!=null){
+                        if(file!=null && !file.isEmpty()){
                         Attachment attachment = new Attachment();
                         attachment.setTransaction(tx);
 
-                        if (attachmentDao.saveAttachment(attachment) == 2) {
-                            tx.addAttachment(attachment);
-                            if(run.equalsIgnoreCase("dev")){
-                            File destFile = new File(storagePath+attachment.getId());
-                            if(file!=null && !file.isEmpty()){
-                                file.transferTo(destFile);
-                                attachment.setUrl(storagePath+attachment.getId());
-                                attachmentDao.editAttachments(attachment);
-                            }
-                            }
+                            if (attachmentDao.saveAttachment(attachment) == 2) {
+                                tx.addAttachment(attachment);
+                                if(run.equalsIgnoreCase("dev")){
+                                    File destFile = new File(storagePath+attachment.getId());
+                                    if(file!=null && !file.isEmpty()){
+                                        file.transferTo(destFile);
+                                        attachment.setUrl(storagePath+attachment.getId());
+                                        attachmentDao.editAttachments(attachment);
+                                    }
+                                }
                              else if(run.equalsIgnoreCase("aws"))
                             {
                                 String fileUrl = this.amazonClient.uploadFile(file, String.valueOf(attachment.getId()));
                                 attachment.setUrl(fileUrl);
                                 attachmentDao.editAttachments(attachment);
                             }
-                        }}
+                        }
+                        }
 
                         map.put("Description",tx);
                         map.put("Code",200);
@@ -95,7 +96,7 @@ public class TransactionController {
 
 
     @RequestMapping(value = "transaction/{id}/attachments", method = RequestMethod.POST)
-    public HashMap<String, Object> saveAttachments(@PathVariable("id") int id, HttpServletRequest req, TransactionDao txDao, AttachmentDao attachmentDao, UserDao userDao, @RequestPart("file") MultipartFile file) throws  Exception{
+    public HashMap<String, Object> saveAttachments(@PathVariable("id") UUID id, HttpServletRequest req, TransactionDao txDao, AttachmentDao attachmentDao, UserDao userDao, @RequestPart("file") MultipartFile file) throws  Exception{
         String headers = req.getHeader(HttpHeaders.AUTHORIZATION);
         User user = null;
         HashMap<String, Object> map = new HashMap<>();
@@ -110,7 +111,7 @@ public class TransactionController {
                 map.put("Description","Unauthorized");
                 return map;
             }else{
-                int txId = id;
+                UUID txId = id;
                 if(txDao.authorizeUser(txId,user) == 2) {
                     Transaction tx = txDao.getTransactionById(txId);
                     Attachment attachment = new Attachment();
@@ -154,7 +155,7 @@ public class TransactionController {
 
 
     @RequestMapping(value="transaction/{id}", method = RequestMethod.DELETE)
-    public HashMap<String, Object> deleteTransaction(@PathVariable("id") int id, HttpServletRequest req, TransactionDao txDao, UserDao userDao, AttachmentDao attachmentDao) throws  Exception{
+    public HashMap<String, Object> deleteTransaction(@PathVariable("id") UUID id, HttpServletRequest req, TransactionDao txDao, UserDao userDao, AttachmentDao attachmentDao) throws  Exception{
         String headers = req.getHeader(HttpHeaders.AUTHORIZATION);
         User user = null;
         HashMap<String, Object> map = new HashMap<>();
@@ -169,8 +170,8 @@ public class TransactionController {
                 map.put("Description","Unauthorized");
                 return map;
             }else{
-                int txId = id;
-                if(txId != 0){
+                UUID txId = id;
+                if(txId != null){
                     if(txDao.authorizeUser(txId,user) == 2) {
                         List<Attachment> list = attachmentDao.getAllAttachments(id);
                         if (txDao.deleteTransaction(txId) == 2) {
@@ -212,7 +213,7 @@ public class TransactionController {
     }
 
     @RequestMapping(value = "transaction/{id}/attachments/{idAttachments}", method = RequestMethod.DELETE)
-    public HashMap<String, Object> deleteAttachments(@PathVariable("id") int id, @PathVariable("idAttachments") int idAt,HttpServletRequest req, TransactionDao txDao, AttachmentDao attachmentDao, UserDao userDao) throws  Exception{
+    public HashMap<String, Object> deleteAttachments(@PathVariable("id") UUID id, @PathVariable("idAttachments") UUID idAt,HttpServletRequest req, TransactionDao txDao, AttachmentDao attachmentDao, UserDao userDao) throws  Exception{
         String headers = req.getHeader(HttpHeaders.AUTHORIZATION);
         User user = null;
         HashMap<String, Object> map = new HashMap<>();
@@ -227,12 +228,10 @@ public class TransactionController {
                 map.put("Description","Unauthorized");
                 return map;
             }else{
-                int txId = id;
+                UUID txId = id;
                 if(txDao.authorizeUser(txId,user) == 2) {
                     Transaction tx = txDao.getTransactionById(txId);
                     Attachment attachment = new Attachment();
-//                    attachment.setFilePath(file.getOriginalFilename());
-//                    attachment.setFile(file);
                     attachment.setTransaction(tx);
                     attachment.setId(idAt);
                     Attachment at = attachmentDao.getAttachmentById(idAt);
@@ -242,7 +241,7 @@ public class TransactionController {
 
 
                        if(run.equalsIgnoreCase("dev")){
-                        File destFile = new File(attachment.getUrl());
+                        File destFile = new File(at.getUrl());
                         if(destFile.exists()){
                             destFile.delete();
                         }
@@ -270,7 +269,7 @@ public class TransactionController {
     }
 
     @RequestMapping(value="transaction/{id}", method = RequestMethod.PUT)
-    public HashMap<String, Object> updateTransaction(@PathVariable("id") int id, HttpServletRequest req, TransactionDao txDao, UserDao userDao) throws  Exception{
+    public HashMap<String, Object> updateTransaction(@PathVariable("id") UUID id, HttpServletRequest req, TransactionDao txDao, UserDao userDao) throws  Exception{
         String headers = req.getHeader(HttpHeaders.AUTHORIZATION);
         User user = null;
         HashMap<String, Object> map = new HashMap<>();
@@ -285,7 +284,7 @@ public class TransactionController {
                 map.put("Description","Unauthorized");
                 return map;
             }else{
-                int txId = id;
+                UUID txId = id;
                 if(txDao.authorizeUser(txId,user) == 2) {
                     Transaction tx = txDao.getTransactionById(txId);
                     if (tx == null) {
@@ -330,7 +329,7 @@ public class TransactionController {
     }
 
     @RequestMapping(value="transaction/{id}/attachments/{aid}", method = RequestMethod.PUT)
-    public HashMap<String, Object> updateAttachmentTransaction(@PathVariable("id") int id,@PathVariable("aid") int aid, HttpServletRequest req, TransactionDao txDao, UserDao userDao, AttachmentDao attachmentDao,@RequestPart("file")MultipartFile file) throws  Exception{
+    public HashMap<String, Object> updateAttachmentTransaction(@PathVariable("id") UUID id,@PathVariable("aid") UUID aid, HttpServletRequest req, TransactionDao txDao, UserDao userDao, AttachmentDao attachmentDao,@RequestPart("file")MultipartFile file) throws  Exception{
         String headers = req.getHeader(HttpHeaders.AUTHORIZATION);
         User user = null;
         HashMap<String, Object> map = new HashMap<>();
@@ -345,7 +344,7 @@ public class TransactionController {
                 map.put("Description","Unauthorized");
                 return map;
             }else{
-                int txId = id;
+                UUID txId = id;
                 if(txDao.authorizeUser(txId,user) == 2) {
                     Transaction tx = txDao.getTransactionById(txId);
                     if (tx == null) {
@@ -392,6 +391,7 @@ public class TransactionController {
         return map;
     }
 
+
     @RequestMapping(value="transaction", method = RequestMethod.GET)
     public HashMap<String, Object> getAllTransaction(HttpServletRequest req, TransactionDao txDao, UserDao userDao) throws  Exception{
 
@@ -430,7 +430,7 @@ public class TransactionController {
 }
 
     @RequestMapping(value = "transaction/{id}/attachments", method = RequestMethod.GET)
-    public HashMap<String, Object> getAllAttachments(@PathVariable("id") int id, HttpServletRequest req, TransactionDao txDao, AttachmentDao attachmentDao, UserDao userDao) throws  Exception{
+    public HashMap<String, Object> getAllAttachments(@PathVariable("id") UUID id, HttpServletRequest req, TransactionDao txDao, AttachmentDao attachmentDao, UserDao userDao) throws  Exception{
         String headers = req.getHeader(HttpHeaders.AUTHORIZATION);
         User user = null;
         HashMap<String, Object> map = new HashMap<>();
@@ -446,7 +446,7 @@ public class TransactionController {
                 return map;
             }else{
 
-                int txId = id;
+                UUID txId = id;
                 if(txDao.authorizeUser(txId,user) == 2) {
                     List<Attachment> list = attachmentDao.getAllAttachments(id);
                     if (list.isEmpty()) {

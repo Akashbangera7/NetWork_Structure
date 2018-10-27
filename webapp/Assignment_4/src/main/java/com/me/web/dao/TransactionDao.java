@@ -7,10 +7,15 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 
 import javax.transaction.TransactionManager;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 public class TransactionDao extends DAO{
 
+    public TransactionDao() throws IOException {
+        super();
+    }
     public int insertTransaction(Transaction transaction) throws Exception{
        try{
            begin();
@@ -24,7 +29,7 @@ public class TransactionDao extends DAO{
 
     }
 
-    public Transaction getTransactionById(int id) throws Exception{
+    public Transaction getTransactionById(UUID id) throws Exception{
         try {
             char flag = ' ';
             if(!getSession().getTransaction().isActive())
@@ -48,7 +53,7 @@ public class TransactionDao extends DAO{
 
     }
 
-    public int authorizeUser(int txId, User user) throws Exception{
+    public int authorizeUser(UUID txId, User user) throws Exception{
         try{
             Transaction tx = getTransactionById(txId);
             if(tx != null){
@@ -70,7 +75,7 @@ public class TransactionDao extends DAO{
         }
     }
 
-    public int deleteTransaction(int id) throws Exception{
+    public int deleteTransaction(UUID id) throws Exception{
         try{
             begin();
             Transaction tx = getTransactionById(id);
@@ -100,11 +105,11 @@ public class TransactionDao extends DAO{
 
     }
 
-    public List<Transaction> getAllTransaction(int id)throws Exception{
+    public List<Transaction> getAllTransaction(UUID id)throws Exception{
         try{
             begin();
             Query q = getSession().createQuery("from Transaction where user_id = :id");
-            q.setInteger("id", id);
+            q.setParameter("id", id);
             List<Transaction> list = q.getResultList();
             commit();
             return list;

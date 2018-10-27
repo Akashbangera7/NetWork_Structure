@@ -8,12 +8,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AttachmentDao extends DAO{
 
-
+    public AttachmentDao() throws IOException {
+        super();
+    }
     public int saveAttachment(Attachment attachment) throws Exception{
         try{
             begin();
@@ -28,7 +32,7 @@ public class AttachmentDao extends DAO{
     }
 
 
-    public Attachment getAttachmentById(int id) throws Exception{
+    public Attachment getAttachmentById(UUID id) throws Exception{
         try {
             char flag = ' ';
             if(!getSession().getTransaction().isActive())
@@ -99,11 +103,11 @@ public class AttachmentDao extends DAO{
     }
     */
 
-    public List<Attachment> getAllAttachments(int id)throws Exception{
+    public List<Attachment> getAllAttachments(UUID id)throws Exception{
         try{
             begin();
             Query q = getSession().createQuery("from Attachment where transaction_id = :id");
-            q.setInteger("id", id);
+            q.setParameter("id", id);
             List<Attachment> list = q.getResultList();
             commit();
             return list;

@@ -8,15 +8,16 @@ import com.me.web.dao.AttachmentDao;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name="transaction")
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="id", unique = true, nullable = false)
-    private int id;
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    @Column(name="id", unique = true, nullable = false, columnDefinition = "BINARY(16)")
+    private UUID id;
 
     @Column(name="description")
     private String description;
@@ -52,11 +53,11 @@ public class Transaction {
         this.user = user;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

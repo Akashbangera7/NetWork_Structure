@@ -1,5 +1,9 @@
 package com.me.web.dao;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -7,15 +11,18 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.springframework.core.io.ClassPathResource;
 
 public class DAO {
 
     private static final Logger log = Logger.getAnonymousLogger();
-
+    Properties prop = new Properties();
     private static final ThreadLocal<Session> sessionThread = new ThreadLocal<Session>();
-    private static final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
+    private static SessionFactory sessionFactory; //= new Configuration().configure().addProperties(prop).buildSessionFactory();
 
-    protected DAO() {
+    protected DAO() throws IOException {
+        prop.load(new ClassPathResource("hibernate.properties").getInputStream());
+        sessionFactory = new Configuration().configure().addProperties(prop).buildSessionFactory();
     }
 
     public static Session getSession()
